@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { useRouter} from 'next/navigation';
 import { createUploadUrl, getAssetIdFromUpload } from '@/app/actions';
-import { Loader2, StopCircle, Monitor } from 'lucide-react';
+import { Loader2, StopCircle, Monitor, Video } from 'lucide-react';
 
 export default function ScreenRecorder() {
     const [isRecording, setIsRecording] = useState(false);
@@ -192,10 +192,10 @@ export default function ScreenRecorder() {
         {mediaBlob && (
             <button 
             onClick={handleUpload} 
-            disabled={isUploading} 
+            disabled={isLoading} 
             className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium flex justify-center items-center gap-2 disabled:opacity-50"
             >
-            {isUploading ? <Loader2 className="animate-spin w-5 h-5" /> : 'Upload & Share'}
+            {isLoading ? <Loader2 className="animate-spin w-5 h-5" /> : 'Upload & Share'}
             </button>
         )}
         </div>
