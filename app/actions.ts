@@ -25,7 +25,12 @@ export async function createUploadUrl() {
         cors_origin: '*',
     });
 
-    return upload;
+    console.log('upload url:', upload.url, 'upload id:', upload.id);
+
+    return {
+        url: upload.url,
+        id: upload.id,
+    };
 }
 
 export async function getAssetIdFromUpload(uploadId: string) {
@@ -50,7 +55,6 @@ export async function listVideos() {
         });
         return assets.data;
     } catch (e) {
-        
         return [];
     }
 }
@@ -61,18 +65,20 @@ function formatVttTime(timestamp: string) {
 
 export async function getAssetStatus(playbackId: string) {
     try {
+        console.log('getAssetStatus called with playbackId:', playbackId);
+
         const assets = await mux.video.assets.list({ limit: 100 });
 
+        const asset = assets.data.find(a => 
+            a.playback_ids?.some(p => p.id === playbackId)
+        );
 
-        const asset = assets.data.find(a => {
-    const ids = a.playback_ids?.map(p => p.id) ?? [];
-    
-    return ids.includes(playbackId);
-});
+        if (!asset) {
+            console.error('Asset not found for playbackId:', playbackId);
+            return { status: 'errored', transcript: [], transcriptStatus: 'errored' };
+        }
 
-       
-
-        if (!asset) return { status: 'errored', transcript: [] };
+        console.log('Found asset:', asset.id, 'status:', asset.status);
 
         let transcript: { time: string; text: string }[] = [];
         let transcriptStatus = 'preparing'; 
@@ -109,13 +115,61 @@ export async function getAssetStatus(playbackId: string) {
             transcript 
         };
     } catch (e) {
+        console.error('getAssetStatus error:', e);
+        return { status: 'errored', transcriptStatus: 'errored', transcript: [] };
+    }
+}
+
+export async function getAssetStatusById(playbackId: string) {
+    try {
+        const supabase = await createServerSupabaseClient()
+        const { data } = await supabase
+            .from('videos')
+            .select('mux_asset_id')
+            .eq('mux_playback_id', playbackId)
+            .single()
+
+        if (!data?.mux_asset_id) {
+            return getAssetStatus(playbackId)
+        }
+
+        const asset = await mux.video.assets.retrieve(data.mux_asset_id)
+
+        let transcript: { time: string; text: string }[] = [];
+        let transcriptStatus = 'preparing';
+
+        if (asset.status === 'ready' && asset.tracks) {
+            const textTrack = asset.tracks.find(
+                t => t.type === 'text' && t.text_type === 'subtitles'
+            );
+
+            if (textTrack && textTrack.status === 'ready') {
+                transcriptStatus = 'ready';
+                const vttUrl = `https://stream.mux.com/${playbackId}/text/${textTrack.id}.vtt`;
+                const response = await fetch(vttUrl);
+                const vttText = await response.text();
+                const blocks = vttText.split('\n\n');
+                transcript = blocks.reduce((acc: { time: string; text: string }[], block) => {
+                    const lines = block.split('\n');
+                    if (lines.length >= 2 && lines[1].includes('-->')) {
+                        const time = formatVttTime(lines[1].split(' --> ')[0]);
+                        const text = lines.slice(2).join(' ');
+                        if (text.trim()) acc.push({ time, text });
+                    }
+                    return acc;
+                }, []);
+            }
+        }
+
+        return { status: asset.status, transcriptStatus, transcript };
+    } catch (e) {
+        console.error('getAssetStatusById error:', e);
         return { status: 'errored', transcriptStatus: 'errored', transcript: [] };
     }
 }
 
 export async function generateVideoSummary(playbackId: string) {
   try {
-    // First, find the asset ID from the playback ID
     const assets = await mux.video.assets.list({ limit: 100 });
     const asset = assets.data.find(a => 
       a.playback_ids?.some(p => p.id === playbackId)
@@ -125,13 +179,10 @@ export async function generateVideoSummary(playbackId: string) {
       throw new Error('Asset not found');
     }
 
-    // Import dynamically to avoid issues with module resolution
     const { getSummaryAndTags } = await import('@mux/ai/workflows');
 
-    // Generate summary using Mux AI
-    // This uses the auto-generated transcript under the hood
     const result = await getSummaryAndTags(asset.id, {
-      tone: 'professional', // Options: 'professional', 'playful', 'neutral'
+      tone: 'professional',
     });
 
     return {
@@ -140,7 +191,6 @@ export async function generateVideoSummary(playbackId: string) {
       tags: result.tags,
     };
   } catch (error) {
-    
     return null;
   }
 }

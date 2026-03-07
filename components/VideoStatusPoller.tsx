@@ -1,47 +1,56 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { getAssetStatus } from '@/app/actions';
+import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
+import MuxPlayerWrapper from '@/components/MuxPlayerWrapper';
 
 export default function VideoStatusPoller({ 
-  id, 
-  isVideoReady 
+  playbackId,
 }: { 
-  id: string; 
-  isVideoReady: boolean;
+  playbackId: string;
 }) {
-  const router = useRouter();
+  const [status, setStatus] = useState<'loading' | 'ready' | 'errored'>('loading');
 
   useEffect(() => {
     const checkStatus = async () => {
-      console.log('Poller checking id:', id);
       try {
-        const { status, transcriptStatus } = await getAssetStatus(id);
+        const response = await fetch(`/api/video-status/${playbackId}`)
+        console.log('response status:', response.status)
+        const data = await response.json()
+        console.log('data:', data)
         
-        if (!isVideoReady && status === 'ready') {
-          router.refresh();
-        }
-        
-        if (isVideoReady && transcriptStatus === 'ready') {
-          router.refresh();
+        if (data.status === 'ready') {
+          setStatus('ready')
+        } else if (data.status === 'errored') {
+          setStatus('errored')
         }
       } catch (err) {
-        console.error('Status check failed, retrying...', err);
+        console.error('Status check failed:', err);
+        setStatus('errored')
       }
     };
 
+    checkStatus();
     const interval = setInterval(checkStatus, 3000);
     return () => clearInterval(interval);
-  }, [id, isVideoReady, router]);
+  }, [playbackId]);
 
-  if (isVideoReady) return null;
+  if (status === 'loading') {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-900">
+        <Loader2 className="w-8 h-8 mb-4 animate-spin text-blue-500" />
+        <p>Processing Video...</p>
+      </div>
+    );
+  }
 
-  return (
-    <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-900">
-      <Loader2 className="w-8 h-8 mb-4 animate-spin text-blue-500" />
-      <p>Processing Video...</p>
-    </div>
-  );
+  if (status === 'errored') {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-900">
+        <p>Error loading video. Please try again.</p>
+      </div>
+    );
+  }
+
+  return <MuxPlayerWrapper playbackId={playbackId} />;
 }
