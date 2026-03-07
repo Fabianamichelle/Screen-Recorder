@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getAssetStatus } from '@/app/actions';
 import { Loader2 } from 'lucide-react';
 
 export default function VideoStatusPoller({ 
@@ -18,7 +17,8 @@ export default function VideoStatusPoller({
     const checkStatus = async () => {
       console.log('Poller checking id:', id);
       try {
-        const { status, transcriptStatus } = await getAssetStatus(id);
+        const response = await fetch(`/api/video-status/${id}`)
+        const { status, transcriptStatus } = await response.json()
         
         if (!isVideoReady && status === 'ready') {
           router.refresh();
