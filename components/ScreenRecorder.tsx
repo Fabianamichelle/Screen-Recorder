@@ -113,8 +113,8 @@ export default function ScreenRecorder() {
 
             // Pull until process completes
         while (true) {
-            const result = getAssetIdFromUpload(uploadConfig.id);
-            if (result.playbackId) {
+            const result = await getAssetIdFromUpload(uploadConfig.id);
+            if (result.playbackId && result.status === 'ready') {
                 router.push(`/video/${result.playbackId}`);
                 break;
             }
@@ -124,6 +124,8 @@ export default function ScreenRecorder() {
 } catch (err) {
             console.error('Upload Failer', err);
             alert('Failed to upload video. Please try again.');
+        } finally {
+            setIsLoading(false);
         }
 };
     return (
