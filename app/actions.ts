@@ -120,6 +120,54 @@ export async function getAssetStatus(playbackId: string) {
     }
 }
 
+export async function getAssetStatusById(playbackId: string) {
+    try {
+        const supabase = await createServerSupabaseClient()
+        const { data } = await supabase
+            .from('videos')
+            .select('mux_asset_id')
+            .eq('mux_playback_id', playbackId)
+            .single()
+
+        if (!data?.mux_asset_id) {
+            return getAssetStatus(playbackId)
+        }
+
+        const asset = await mux.video.assets.retrieve(data.mux_asset_id)
+
+        let transcript: { time: string; text: string }[] = [];
+        let transcriptStatus = 'preparing';
+
+        if (asset.status === 'ready' && asset.tracks) {
+            const textTrack = asset.tracks.find(
+                t => t.type === 'text' && t.text_type === 'subtitles'
+            );
+
+            if (textTrack && textTrack.status === 'ready') {
+                transcriptStatus = 'ready';
+                const vttUrl = `https://stream.mux.com/${playbackId}/text/${textTrack.id}.vtt`;
+                const response = await fetch(vttUrl);
+                const vttText = await response.text();
+                const blocks = vttText.split('\n\n');
+                transcript = blocks.reduce((acc: { time: string; text: string }[], block) => {
+                    const lines = block.split('\n');
+                    if (lines.length >= 2 && lines[1].includes('-->')) {
+                        const time = formatVttTime(lines[1].split(' --> ')[0]);
+                        const text = lines.slice(2).join(' ');
+                        if (text.trim()) acc.push({ time, text });
+                    }
+                    return acc;
+                }, []);
+            }
+        }
+
+        return { status: asset.status, transcriptStatus, transcript };
+    } catch (e) {
+        console.error('getAssetStatusById error:', e);
+        return { status: 'errored', transcriptStatus: 'errored', transcript: [] };
+    }
+}
+
 export async function generateVideoSummary(playbackId: string) {
   try {
     const assets = await mux.video.assets.list({ limit: 100 });

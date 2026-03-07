@@ -5,6 +5,8 @@ import VideoStatusPoller from '@/components/VideoStatusPoller';
 import ShareButton from '@/components/ShareButton';
 import VideoSummary from '@/components/VideoSummary';
 import { ArrowLeft, Download } from 'lucide-react';
+import { getAssetStatusById } from '@/app/actions';
+
 
 export default async function VideoPage({ 
     params 
@@ -13,7 +15,7 @@ export default async function VideoPage({
 }) {
     const { id: playbackId } = await params;
     console.log('VideoPage playbackId:', playbackId);
-    const { status, transcriptStatus, transcript } = await getAssetStatus(playbackId);
+    const { status, transcriptStatus, transcript } = await getAssetStatusById(playbackId);
 
     const isVideoReady = status === 'ready';
     const isTranscriptReady = transcriptStatus === 'ready';
