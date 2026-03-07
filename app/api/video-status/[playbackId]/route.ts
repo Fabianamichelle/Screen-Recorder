@@ -3,9 +3,9 @@ import { getAssetStatus } from '@/app/actions'
 
 export async function GET(
   request: Request,
-  { params }: { params: { playbackId: string } }
+  { params }: { params: Promise<{ playbackId: string }> }
 ) {
-  const { playbackId } = params
+  const { playbackId } = await params
   const result = await getAssetStatus(playbackId)
   return NextResponse.json(result)
 }
