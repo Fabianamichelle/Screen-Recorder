@@ -25,7 +25,8 @@ export async function createUploadUrl() {
         cors_origin: '*',
     });
 
-    // Explicitly return only what we need
+    console.log('upload url:', upload.url, 'upload id:', upload.id);
+
     return {
         url: upload.url,
         id: upload.id,
@@ -54,7 +55,6 @@ export async function listVideos() {
         });
         return assets.data;
     } catch (e) {
-        
         return [];
     }
 }
@@ -65,18 +65,20 @@ function formatVttTime(timestamp: string) {
 
 export async function getAssetStatus(playbackId: string) {
     try {
+        console.log('getAssetStatus called with playbackId:', playbackId);
+
         const assets = await mux.video.assets.list({ limit: 100 });
 
+        const asset = assets.data.find(a => 
+            a.playback_ids?.some(p => p.id === playbackId)
+        );
 
-        const asset = assets.data.find(a => {
-    const ids = a.playback_ids?.map(p => p.id) ?? [];
-    
-    return ids.includes(playbackId);
-});
+        if (!asset) {
+            console.error('Asset not found for playbackId:', playbackId);
+            return { status: 'errored', transcript: [], transcriptStatus: 'errored' };
+        }
 
-       
-
-        if (!asset) return { status: 'errored', transcript: [] };
+        console.log('Found asset:', asset.id, 'status:', asset.status);
 
         let transcript: { time: string; text: string }[] = [];
         let transcriptStatus = 'preparing'; 
@@ -113,13 +115,13 @@ export async function getAssetStatus(playbackId: string) {
             transcript 
         };
     } catch (e) {
+        console.error('getAssetStatus error:', e);
         return { status: 'errored', transcriptStatus: 'errored', transcript: [] };
     }
 }
 
 export async function generateVideoSummary(playbackId: string) {
   try {
-    // First, find the asset ID from the playback ID
     const assets = await mux.video.assets.list({ limit: 100 });
     const asset = assets.data.find(a => 
       a.playback_ids?.some(p => p.id === playbackId)
@@ -129,13 +131,10 @@ export async function generateVideoSummary(playbackId: string) {
       throw new Error('Asset not found');
     }
 
-    // Import dynamically to avoid issues with module resolution
     const { getSummaryAndTags } = await import('@mux/ai/workflows');
 
-    // Generate summary using Mux AI
-    // This uses the auto-generated transcript under the hood
     const result = await getSummaryAndTags(asset.id, {
-      tone: 'professional', // Options: 'professional', 'playful', 'neutral'
+      tone: 'professional',
     });
 
     return {
@@ -144,7 +143,6 @@ export async function generateVideoSummary(playbackId: string) {
       tags: result.tags,
     };
   } catch (error) {
-    
     return null;
   }
 }
