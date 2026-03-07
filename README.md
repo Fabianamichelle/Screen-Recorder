@@ -1,37 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Screen Recorder
+
+A Loom-style screen recording app built with Next.js 15, Mux, and AI-powered transcripts.
+
+## Features
+
+- Record your screen with microphone audio
+- Automatic video processing and hosting via Mux
+- AI-generated transcripts
+- AI video summary and tags
+- Shareable video links
+- MP4 download support
+
+## Tech Stack
+
+- **Next.js 15** (App Router, Server Actions)
+- **Mux** (video upload, processing, playback, transcription)
+- **Tailwind CSS**
+- **TypeScript**
 
 ## Getting Started
 
-First, run the development server:
+### 1. Clone the repo
 
-```bash
+git clone <your-repo-url>
+cd screen-recorder
+
+### 2. Install dependencies
+
+npm install
+
+### 3. Set up environment variables
+
+Create a `.env.local` file in the root:
+
+MUX_TOKEN_ID=your_mux_token_id
+MUX_TOKEN_SECRET=your_mux_token_secret
+
+You can get your Mux credentials from dashboard.mux.com.
+
+### 4. Run the dev server
+
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000 in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Usage
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Click **Start Recording** and select your screen to share
+2. Allow microphone access when prompted
+3. Click **Stop Recording** when done
+4. Click **Upload & Share** to process and upload your video
+5. Wait for Mux to process the video, then view and share it
 
-## Learn More
+## Notes
 
-To learn more about Next.js, take a look at the following resources:
+- Screen recording requires a modern browser (Chrome recommended)
+- Video processing can take 30-60 seconds depending on length
+- AI transcripts are generated automatically after processing
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Credits
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# Screen-Recorder
+Built following the tutorial by [Josh tried coding](https://www.youtube.com/watch?v=IBTx5aGj-6U) on YouTube.
