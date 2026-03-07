@@ -2,6 +2,8 @@
 
 A Loom-style screen recording app built with Next.js 15, Mux, and AI-powered transcripts.
 
+![Screen Recorder App](/screenrecorder1.png)
+![Screen Recorder App](/screenrecorder2.png)
 ## Features
 
 - Record your screen with microphone audio
