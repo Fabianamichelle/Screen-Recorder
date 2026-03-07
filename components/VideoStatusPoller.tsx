@@ -1,9 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Copy, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import MuxPlayerWrapper from '@/components/MuxPlayerWrapper';
-
 
 export default function VideoStatusPoller({ 
   playbackId,
@@ -16,7 +15,9 @@ export default function VideoStatusPoller({
     const checkStatus = async () => {
       try {
         const response = await fetch(`/api/video-status/${playbackId}`)
+        console.log('response status:', response.status)
         const data = await response.json()
+        console.log('data:', data)
         
         if (data.status === 'ready') {
           setStatus('ready')
@@ -24,7 +25,8 @@ export default function VideoStatusPoller({
           setStatus('errored')
         }
       } catch (err) {
-        console.error('Status check failed, retrying...', err);
+        console.error('Status check failed:', err);
+        setStatus('errored')
       }
     };
 
