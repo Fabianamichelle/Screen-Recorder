@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 
@@ -35,8 +36,8 @@ export default function LoginPage() {
     <main className="min-h-screen bg-white flex items-center justify-center p-6">
       <div className="w-full max-w-sm bg-white border border-orange-200 rounded-2xl p-8 space-y-6 shadow-2xl shadow-orange-100/50">
         <div className="text-center space-y-1">
-          <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-600 to-amber-400 shadow-lg mb-2">
-            <span className="text-white text-lg font-bold">L</span>
+          <div className="inline-flex items-center justify-center mb-2">
+            <Image src="/record.png" alt="Logo" width={48} height={48} />
           </div>
           <h1 className="text-2xl font-bold text-zinc-900">
             {isSignUp ? 'Create an account' : 'Welcome back'}
