@@ -25,7 +25,11 @@ export async function createUploadUrl() {
         cors_origin: '*',
     });
 
-    return upload;
+    // Explicitly return only what we need
+    return {
+        url: upload.url,
+        id: upload.id,
+    };
 }
 
 export async function getAssetIdFromUpload(uploadId: string) {
