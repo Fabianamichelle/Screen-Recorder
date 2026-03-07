@@ -12,6 +12,7 @@ export default async function VideoPage({
     params: Promise<{ id: string }> 
 }) {
     const { id: playbackId } = await params;
+    
     const { status, transcriptStatus, transcript } = await getAssetStatus(playbackId);
 
     const isVideoReady = status === 'ready';

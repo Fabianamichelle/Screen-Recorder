@@ -16,14 +16,19 @@ export default function VideoStatusPoller({
 
   useEffect(() => {
     const checkStatus = async () => {
-      const { status, transcriptStatus } = await getAssetStatus(id);
-      
-      if (!isVideoReady && status === 'ready') {
-        router.refresh();
-      }
-      
-      if (isVideoReady && transcriptStatus === 'ready') {
-        router.refresh();
+      console.log('Poller checking id:', id);
+      try {
+        const { status, transcriptStatus } = await getAssetStatus(id);
+        
+        if (!isVideoReady && status === 'ready') {
+          router.refresh();
+        }
+        
+        if (isVideoReady && transcriptStatus === 'ready') {
+          router.refresh();
+        }
+      } catch (err) {
+        console.error('Status check failed, retrying...', err);
       }
     };
 

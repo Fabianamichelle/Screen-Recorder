@@ -48,7 +48,7 @@ export async function listVideos() {
         });
         return assets.data;
     } catch (e) {
-        console.error("Error listing videos", e);
+        
         return [];
     }
 }
@@ -60,9 +60,15 @@ function formatVttTime(timestamp: string) {
 export async function getAssetStatus(playbackId: string) {
     try {
         const assets = await mux.video.assets.list({ limit: 100 });
-        const asset = assets.data.find(a => 
-            a.playback_ids?.some(p => p.id === playbackId)
-        );
+
+
+        const asset = assets.data.find(a => {
+    const ids = a.playback_ids?.map(p => p.id) ?? [];
+    
+    return ids.includes(playbackId);
+});
+
+       
 
         if (!asset) return { status: 'errored', transcript: [] };
 
@@ -132,7 +138,7 @@ export async function generateVideoSummary(playbackId: string) {
       tags: result.tags,
     };
   } catch (error) {
-    console.error('Error generating summary:', error);
+    
     return null;
   }
 }

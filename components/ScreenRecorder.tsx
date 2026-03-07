@@ -24,7 +24,8 @@ export default function ScreenRecorder() {
             const screenStream = await navigator.mediaDevices.getDisplayMedia({
                 video: true,
                 audio: false,
-            });
+            }
+        );
 
 
             // capture microphone audio
@@ -114,6 +115,7 @@ export default function ScreenRecorder() {
             // Pull until process completes
         while (true) {
             const result = await getAssetIdFromUpload(uploadConfig.id);
+            console.log('Polling result:', result);
             if (result.playbackId && result.status === 'ready') {
                 router.push(`/video/${result.playbackId}`);
                 break;
@@ -122,7 +124,7 @@ export default function ScreenRecorder() {
         }
 
 } catch (err) {
-            console.error('Upload Failer', err);
+            console.error('Upload Failed', err);
             alert('Failed to upload video. Please try again.');
         } finally {
             setIsLoading(false);
