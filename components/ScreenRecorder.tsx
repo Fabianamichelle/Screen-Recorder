@@ -2,8 +2,8 @@
 
 import { useState, useRef } from 'react';
 import { useRouter} from 'next/navigation';
-import { createUploadUrl, getAssetIdFromUpload } from '@/app/actions';
 import { Loader2, StopCircle, Monitor, Video } from 'lucide-react';
+import { createUploadUrl, getAssetIdFromUpload, saveVideo } from '@/app/actions';
 
 export default function ScreenRecorder() {
     const [isRecording, setIsRecording] = useState(false);
@@ -114,14 +114,19 @@ export default function ScreenRecorder() {
 
             // Pull until process completes
         while (true) {
-            const result = await getAssetIdFromUpload(uploadConfig.id);
-            console.log('Polling result:', result);
-            if (result.playbackId && result.status === 'ready') {
-                router.push(`/video/${result.playbackId}`);
-                break;
-            }
-            await new Promise(r => setTimeout(r, 2000));
-        }
+    const result = await getAssetIdFromUpload(uploadConfig.id);
+    console.log('Polling result:', result);
+    if (result.playbackId && result.status === 'ready') {
+        await saveVideo({
+            muxAssetId: result.assetId,
+            muxPlaybackId: result.playbackId,
+            title: 'Untitled Recording',
+        });
+        router.push(`/video/${result.playbackId}`);
+        break;
+    }
+    await new Promise(r => setTimeout(r, 2000));
+}
 
 } catch (err) {
             console.error('Upload Failed', err);
@@ -132,16 +137,16 @@ export default function ScreenRecorder() {
 };
     return (
 
-    <div className="flex flex-col items-center gap-6 p-8 bg-slate-900 rounded-xl border border-slate-700 w-full max-w-md shadow-2xl">
+    <div className="flex flex-col items-center gap-6 p-8 bg-zinc-900 rounded-xl border border-orange-800/40 w-full max-w-md shadow-2xl shadow-orange-950/40">
         <h2 className="text-2xl font-bold text-white">
         {isRecording ? "Recording..." : "New Recording"}
         </h2>
 
         {/* Preview Area */}
-        <div className="w-full aspect-video bg-black rounded-lg border border-slate-800 flex items-center justify-center relative overflow-hidden">
-        
+        <div className="w-full aspect-video bg-black rounded-lg border border-orange-800/30 flex items-center justify-center relative overflow-hidden">
+
         {/* Live Preview (while recording) */}
-        <video 
+        <video
             ref={liveVideoRef}
             autoPlay
             playsInline
@@ -151,7 +156,7 @@ export default function ScreenRecorder() {
 
         {/* Recording Ready State */}
         {!isRecording && mediaBlob && (
-            <div className="text-emerald-400 flex flex-col items-center">
+            <div className="text-amber-400 flex flex-col items-center">
             <Video className="w-12 h-12 mb-2" />
             <span>Recording Ready</span>
             </div>
@@ -159,7 +164,7 @@ export default function ScreenRecorder() {
 
         {/* Idle State */}
         {!isRecording && !mediaBlob && (
-            <div className="text-slate-600 flex flex-col items-center">
+            <div className="text-orange-300/30 flex flex-col items-center">
             <Monitor className="w-12 h-12 mb-2 opacity-50" />
             <span>Preview Area</span>
             </div>
@@ -176,28 +181,28 @@ export default function ScreenRecorder() {
         {/* Controls */}
         <div className="flex w-full gap-4">
         {!isRecording && !mediaBlob && (
-            <button 
-            onClick={startRecording} 
-            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium"
+            <button
+            onClick={startRecording}
+            className="w-full py-3 bg-orange-500 hover:bg-orange-400 text-white rounded-lg font-medium transition"
             >
             Start Recording
             </button>
         )}
-        
+
         {isRecording && (
-            <button 
-            onClick={stopRecording} 
-            className="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium flex justify-center items-center gap-2"
+            <button
+            onClick={stopRecording}
+            className="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium flex justify-center items-center gap-2 transition"
             >
             <StopCircle className="w-5 h-5" /> Stop Recording
             </button>
         )}
 
         {mediaBlob && (
-            <button 
-            onClick={handleUpload} 
-            disabled={isLoading} 
-            className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium flex justify-center items-center gap-2 disabled:opacity-50"
+            <button
+            onClick={handleUpload}
+            disabled={isLoading}
+            className="w-full py-3 bg-amber-500 hover:bg-amber-400 text-white rounded-lg font-medium flex justify-center items-center gap-2 disabled:opacity-50 transition"
             >
             {isLoading ? <Loader2 className="animate-spin w-5 h-5" /> : 'Upload & Share'}
             </button>

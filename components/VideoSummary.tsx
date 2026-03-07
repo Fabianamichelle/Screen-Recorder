@@ -32,14 +32,14 @@ export default function VideoSummary({ playbackId }: { playbackId: string }) {
 
   if (summary) {
     return (
-        <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
+        <div className="bg-zinc-900 p-6 rounded-xl border border-orange-800/30">
             <h3 className="text-lg font-bold text-white mb-2">{summary.title}</h3>
-            <p className="text-slate-300 text-sm leading-relaxed mb-4">{summary.summary}</p>
+            <p className="text-orange-100/80 text-sm leading-relaxed mb-4">{summary.summary}</p>
             <div className="flex flex-wrap gap-2">
             {summary.tags.map((tag) => (
-                <span 
-                key={tag} 
-                className="bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full text-xs font-medium"
+                <span
+                key={tag}
+                className="bg-orange-500/20 text-orange-300 px-3 py-1 rounded-full text-xs font-medium"
                 >
                 #{tag}
                 </span>
@@ -53,7 +53,7 @@ export default function VideoSummary({ playbackId }: { playbackId: string }) {
     <button
         onClick={handleGenerate}
         disabled={isGenerating}
-        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-600/50 text-white rounded-lg font-medium transition"
+        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-orange-600 hover:bg-orange-500 disabled:bg-orange-600/50 text-white rounded-lg font-medium transition"
     >
         {isGenerating ? (
             <>

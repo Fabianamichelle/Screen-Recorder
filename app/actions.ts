@@ -1,6 +1,7 @@
 'use server';
 
 import Mux from '@mux/mux-node';
+import { createServerSupabaseClient } from '@/lib/supabase-server'
 
 const mux = new Mux({
     tokenId: process.env.MUX_TOKEN_ID,
@@ -33,6 +34,7 @@ export async function getAssetIdFromUpload(uploadId: string) {
     if (upload.asset_id) {
         const asset = await mux.video.assets.retrieve(upload.asset_id);
         return { 
+            assetId: upload.asset_id,
             playbackId: asset.playback_ids?.[0]?.id,
             status: asset.status 
         };
@@ -141,4 +143,39 @@ export async function generateVideoSummary(playbackId: string) {
     
     return null;
   }
+}
+
+export async function saveVideo({ muxAssetId, muxPlaybackId, title }: { muxAssetId: string, muxPlaybackId: string, title: string }) {
+  const supabase = await createServerSupabaseClient()
+  
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  if (!user) throw new Error('Not authenticated')
+
+  const { error } = await supabase.from('videos').insert({
+    user_id: user.id,
+    mux_asset_id: muxAssetId,
+    mux_playback_id: muxPlaybackId,
+    title: title || 'Untitled Recording',
+  })
+
+  if (error) throw error
+}
+
+export async function listUserVideos() {
+  const supabase = await createServerSupabaseClient()
+  
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  if (!user) return []
+
+  const { data, error } = await supabase
+    .from('videos')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+
+  if (error) return []
+  
+  return data
 }

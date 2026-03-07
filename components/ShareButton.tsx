@@ -15,7 +15,7 @@ export default function ShareButton() {
   return (
     <button 
       onClick={handleShare}
-      className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
+      className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-400 text-white rounded-lg font-medium transition"
     >
       {copied ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
       {copied ? 'Copied Link!' : 'Share Video'}
