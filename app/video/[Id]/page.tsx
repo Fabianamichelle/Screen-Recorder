@@ -12,7 +12,7 @@ export default async function VideoPage({
     params: Promise<{ id: string }> 
 }) {
     const { id: playbackId } = await params;
-    
+    console.log('VideoPage playbackId:', playbackId);
     const { status, transcriptStatus, transcript } = await getAssetStatus(playbackId);
 
     const isVideoReady = status === 'ready';
