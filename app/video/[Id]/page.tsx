@@ -1,12 +1,12 @@
 import Link from 'next/link';
-import { getAssetStatus } from '@/app/actions';
+import { getAssetStatusById } from '@/app/actions';
 import MuxPlayerWrapper from '@/components/MuxPlayerWrapper';
-import VideoStatusPoller from '@/components/VideoStatusPoller';
 import ShareButton from '@/components/ShareButton';
 import VideoSummary from '@/components/VideoSummary';
-import { ArrowLeft, Download } from 'lucide-react';
-import { getAssetStatusById } from '@/app/actions';
+import { ArrowLeft, Download, Loader2 } from 'lucide-react';
 
+export const revalidate = 0
+export const dynamic = 'force-dynamic'
 
 export default async function VideoPage({ 
     params 
@@ -14,7 +14,7 @@ export default async function VideoPage({
     params: Promise<{ id: string }> 
 }) {
     const { id: playbackId } = await params;
-    console.log('VideoPage playbackId:', playbackId);
+
     const { status, transcriptStatus, transcript } = await getAssetStatusById(playbackId);
 
     const isVideoReady = status === 'ready';
@@ -41,12 +41,13 @@ export default async function VideoPage({
             <div className="lg:col-span-2 space-y-6">
             <div className="bg-black rounded-2xl overflow-hidden shadow-2xl border border-orange-800/30 aspect-video relative">
                 {isVideoReady ? (
-                <>
                     <MuxPlayerWrapper playbackId={playbackId} />
-                    {!isTranscriptReady && <VideoStatusPoller id={playbackId} isVideoReady={true} />}
-                </>
                 ) : (
-                <VideoStatusPoller id={playbackId} isVideoReady={false} />
+                    <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-900">
+                        <meta httpEquiv="refresh" content="3" />
+                        <Loader2 className="w-8 h-8 mb-4 animate-spin text-blue-500" />
+                        <p>Processing Video...</p>
+                    </div>
                 )}
             </div>
             
@@ -104,4 +105,4 @@ export default async function VideoPage({
         </div>
         </main>
   );
-} 
+}
